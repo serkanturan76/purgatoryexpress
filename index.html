@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purgatory Express</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Rye&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              steam: {
+                dark: '#0f0f11',
+                charcoal: '#262626',
+                rust: '#8b3a18',
+                rustLight: '#b7410e',
+                brass: '#b5915f',
+                brassDark: '#785e3a',
+                verdigris: '#43b3ae',
+                blood: '#660000',
+                parchment: '#d4c5a3',
+                parchmentDim: '#a89f81'
+              }
+            },
+            fontFamily: {
+              cinzel: ['Cinzel', 'serif'],
+              playfair: ['Playfair Display', 'serif'],
+              rye: ['Rye', 'cursive'],
+            },
+            animation: {
+              'fog-drift': 'drift 20s linear infinite alternate',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+              drift: {
+                '0%': { transform: 'translateX(-5%) opacity(0.8)' },
+                '100%': { transform: 'translateX(5%) opacity(0.4)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #0f0f11;
+        color: #d4c5a3;
+      }
+      .scrollbar-steam::-webkit-scrollbar {
+        width: 8px;
+      }
+      .scrollbar-steam::-webkit-scrollbar-track {
+        background: #1a1a1a; 
+      }
+      .scrollbar-steam::-webkit-scrollbar-thumb {
+        background: #8b3a18; 
+        border-radius: 4px;
+      }
+      .glass-gauge {
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), rgba(0,0,0,0.4));
+        box-shadow: inset 0 0 10px #000;
+        border: 2px solid #555;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
