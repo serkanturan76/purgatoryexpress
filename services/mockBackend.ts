@@ -2,21 +2,27 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 import { User, GameState, GamePhase, Player, SinType, StationLogEntry } from '../types';
 import { WAGON_CARDS, ADMIN_EMAIL, ADMIN_PASS } from '../constants';
 
-// Netlify değişkenlerini okuma (Vite veya standart Node ortamı için uyumlu)
-// Eğer build aşamasında hata alırsan veya Netlify'da çalışmazsa buraya direkt tırnak içinde Supabase bilgilerini de yazabilirsin.
+// Netlify değişkenlerini daha esnek bir şekilde okuyalım
 const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || "";
 const supabaseKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || "";
 
-if (!supabaseUrl || !supabaseKey) {
-  console.warn("Supabase bağlantı bilgileri eksik! Netlify Environment Variables ayarlarını kontrol edin.");
+// Eğer bilgiler eksikse, uygulamanın çökmesini engellemek için boş bir client oluşturmuyoruz, 
+// onun yerine her fonksiyonda kontrol edeceğiz.
+let supabase: any = null;
+if (supabaseUrl && supabaseKey) {
+  supabase = createClient(supabaseUrl, supabaseKey);
 }
-
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 type Listener = () => void;
 let listeners: Listener[] = [];
 let activeGame: GameState | null = null;
 let subscription: any = null;
+
+const checkInit = () => {
+  if (!supabase) {
+    throw new Error("Supabase bağlantısı kurulamadı. Lütfen Netlify üzerindeki VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY ayarlarını kontrol edin.");
+  }
+};
 
 export const Backend = {
   subscribe: (listener: Listener) => {
@@ -32,41 +38,63 @@ export const Backend = {
 
   emitChange: () => listeners.forEach(l => l()),
 
-  register: (email: string, pass: string, nickname: string) => {
-    const user = { email, nickname, isAdmin: email === ADMIN_EMAIL };
+  // --- Yeni Veritabanı Tabanlı Auth ---
+  register: async (email: string, pass: string, nickname: string) => {
+    checkInit();
+    // Önce bu email var mı kontrol et
+    const { data: existing } = await supabase.from('passenger_profiles').select('email').eq('email', email).single();
+    if (existing) throw new Error("Bu bilet (email) zaten kullanılmış.");
+
+    const newUser = {
+      email,
+      password: pass,
+      nickname,
+      is_admin: email === ADMIN_EMAIL
+    };
+
+    const { error } = await supabase.from('passenger_profiles').insert([newUser]);
+    if (error) throw new Error("Kayıt sırasında tren arızalandı: " + error.message);
+
+    localStorage.setItem('purgatory_user', JSON.stringify({ email, nickname, isAdmin: newUser.is_admin }));
+    return { email, nickname, isAdmin: newUser.is_admin };
+  },
+
+  login: async (email: string, pass: string) => {
+    checkInit();
+    const { data, error } = await supabase
+      .from('passenger_profiles')
+      .select('*')
+      .eq('email', email)
+      .eq('password', pass)
+      .single();
+
+    if (error || !data) throw new Error("Geçersiz bilet bilgileri veya hatalı şifre.");
+
+    const user = { email: data.email, nickname: data.nickname, isAdmin: data.is_admin };
     localStorage.setItem('purgatory_user', JSON.stringify(user));
     return user;
   },
 
-  login: (email: string, pass: string) => {
-    if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
-      return { email, nickname: "The Architect", isAdmin: true };
-    }
-    const stored = localStorage.getItem('purgatory_user');
-    if (stored) {
-      const u = JSON.parse(stored);
-      if (u.email === email) return u;
-    }
-    throw new Error("Geçersiz bilet bilgileri.");
-  },
-
+  // --- Diğer Fonksiyonlar (Aynı Kalıyor ama checkInit eklendi) ---
   getLogs: async () => {
+    if (!supabase) return [];
     try {
       const { data, error } = await supabase.from('logs').select('*').order('created_at', { ascending: false });
       if (error) throw error;
-      return data.map(d => ({ ...d.data, id: d.id }));
+      return data.map((d: any) => ({ ...d.data, id: d.id }));
     } catch (e) {
-      console.error("Log hatası:", e);
       return [];
     }
   },
 
   deleteLog: async (id: string) => {
+    checkInit();
     await supabase.from('logs').delete().eq('id', id);
     Backend.emitChange();
   },
 
   createGame: async (conductorNickname: string) => {
+    checkInit();
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const initialState: GameState = {
       code,
@@ -93,6 +121,7 @@ export const Backend = {
   },
 
   joinGame: async (code: string, nickname: string) => {
+    checkInit();
     const { data, error } = await supabase.from('games').select('*').eq('id', code).single();
     if (error || !data) throw new Error("Tren bulunamadı veya kod hatalı.");
     
@@ -110,25 +139,19 @@ export const Backend = {
   },
 
   watchGame: async (code: string) => {
+    if (!supabase) return;
     if (subscription) subscription.unsubscribe();
     
-    // Mevcut durumu hemen çek
     const { data } = await supabase.from('games').select('*').eq('id', code).single();
     if (data) {
       activeGame = data.state;
       Backend.emitChange();
     }
 
-    // Gerçek zamanlı dinlemeyi başlat
     subscription = supabase
       .channel(`game_${code}`)
-      .on('postgres_changes', { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'games', 
-        filter: `id=eq.${code}` 
-      }, 
-      (payload) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${code}` }, 
+      (payload: any) => {
         activeGame = (payload.new as any).state;
         Backend.emitChange();
       })
@@ -138,9 +161,8 @@ export const Backend = {
   getGameState: () => activeGame,
 
   updateRemoteState: async (newState: GameState) => {
-    if (!activeGame) return;
-    const { error } = await supabase.from('games').update({ state: newState }).eq('id', activeGame.code);
-    if (error) console.error("Güncelleme hatası:", error);
+    if (!activeGame || !supabase) return;
+    await supabase.from('games').update({ state: newState }).eq('id', activeGame.code);
   },
 
   startGame: () => {
@@ -240,7 +262,7 @@ export const Backend = {
   },
 
   endGame: async () => {
-    if (!activeGame) return;
+    if (!activeGame || !supabase) return;
     const state = { ...activeGame, phase: GamePhase.GAME_END };
     
     const entry: StationLogEntry = {
