@@ -162,7 +162,7 @@ export default function GameRoom({ gameState, user }: Props) {
                 const pendingCards = gameState.memoryCards.filter(m => m.playerNickname === p.nickname && !m.revealed).length;
                 return (
                     <li key={p.nickname} className="flex justify-between items-center text-sm border-b border-white/5 pb-1">
-                        <span className={p.burdened ? "text-red-400 font-black" : "text-steam-parchment font-medium"}>
+                        <span className={p.nickname === user.nickname ? "text-steam-verdigris font-bold underline" : p.burdened ? "text-red-400 font-black" : "text-steam-parchment font-medium"}>
                             {p.nickname} {p.burdened && "💀"}
                         </span>
                         <div className="flex gap-2 text-xs">
@@ -185,7 +185,7 @@ export default function GameRoom({ gameState, user }: Props) {
 
         {/* Wagon Window Frame */}
         <div className="relative group">
-            <div className="bg-[#2d2d2d] border-[4px] border-steam-brassDark rounded-t-[40px] p-2 shadow-[0_15px_40px_rgba(0,0,0,0.9)] relative z-10 min-h-[420px]">
+            <div className="bg-[#2d2d2d] border-[4px] border-steam-brassDark rounded-t-[40px] p-2 shadow-[0_15px_40px_rgba(0,0,0,0.9)] relative z-10">
                 
                 {/* Decorative Rivets */}
                 <div className="absolute top-3 left-3 w-4 h-4 rounded-full bg-gradient-to-br from-steam-brass to-steam-brassDark shadow-[1px_1px_2px_rgba(0,0,0,0.8)] z-20 border border-black/80"></div>
@@ -194,8 +194,8 @@ export default function GameRoom({ gameState, user }: Props) {
                 {/* Inner Bezel */}
                 <div className="bg-black border-[3px] border-steam-brass/60 rounded-t-[32px] overflow-hidden relative shadow-[inset_0_0_50px_rgba(0,0,0,1)] h-full">
                     
-                    {/* The Viewport */}
-                    <div className="relative h-[300px] overflow-hidden border-b-8 border-steam-brassDark/80">
+                    {/* The Viewport - Set to aspect-video for 16:9 ratio */}
+                    <div className="relative aspect-video overflow-hidden border-b-8 border-steam-brassDark/80 w-full">
                         <img 
                             src={gameState.currentWagon?.imageUrl} 
                             className="w-full h-full object-cover opacity-90 sepia-[0.2] transition-transform duration-[20s] ease-linear scale-110 group-hover:scale-100" 
@@ -259,23 +259,50 @@ export default function GameRoom({ gameState, user }: Props) {
 
         {/* Revealed Cards Display */}
         {gameState.phase === GamePhase.ROLEPLAY && (
-             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 overflow-y-auto max-h-40 scrollbar-steam p-3 bg-black/40 border-2 border-steam-brassDark shadow-inner">
-                {gameState.memoryCards.map(card => (
-                    <div 
-                        key={card.id} 
-                        onClick={() => Backend.revealCard(card.id)}
-                        className={`p-2.5 border-2 text-xs cursor-pointer transition-all shadow-sm ${card.revealed ? 'bg-steam-parchment text-black border-steam-brass font-bold' : 'bg-steam-dark/80 text-steam-verdigris border-steam-verdigris/50 border-dashed hover:border-steam-verdigris'}`}
-                    >
-                        {card.revealed ? (
-                            <>
-                                <span className="block border-b border-black/10 mb-1">{card.playerNickname}</span>
-                                <span className="italic font-playfair text-sm">"{card.word}"</span> <span className="text-[10px] opacity-70 uppercase tracking-tighter">({card.sin})</span>
-                            </>
-                        ) : (
-                            <span className="opacity-70 tracking-widest uppercase font-bold text-center block py-1">Reveal Secret</span>
-                        )}
-                    </div>
-                ))}
+             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto max-h-60 scrollbar-steam p-4 bg-black/60 border-2 border-steam-brassDark shadow-inner">
+                {gameState.memoryCards.map(card => {
+                    const isMine = card.playerNickname === user.nickname;
+                    return (
+                        <div 
+                            key={card.id} 
+                            onClick={() => Backend.revealCard(card.id)}
+                            className={`
+                                p-3 border-2 text-xs cursor-pointer transition-all shadow-sm relative overflow-hidden group
+                                ${card.revealed 
+                                    ? 'bg-steam-parchment text-black border-steam-brass font-bold' 
+                                    : isMine 
+                                        ? 'bg-steam-verdigris/10 border-steam-verdigris animate-pulse-slow shadow-[0_0_10px_rgba(99,209,204,0.3)]' 
+                                        : 'bg-steam-dark/80 text-steam-verdigris border-steam-verdigris/40 border-dashed hover:border-steam-verdigris hover:bg-black'
+                                }
+                            `}
+                        >
+                            {card.revealed ? (
+                                <>
+                                    <span className={`block border-b border-black/10 mb-1 text-[10px] uppercase ${isMine ? 'text-steam-rust' : 'text-black/60'}`}>
+                                        {isMine ? 'Your Confession' : card.playerNickname}
+                                    </span>
+                                    <span className="italic font-playfair text-base block py-1">"{card.word}"</span> 
+                                    <span className="text-[10px] opacity-70 uppercase tracking-tighter bg-black/5 px-1 rounded">{card.sin}</span>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-2 text-center">
+                                    {isMine ? (
+                                        <>
+                                            <span className="text-[9px] uppercase tracking-widest text-steam-verdigris mb-1 font-black">Your Secret</span>
+                                            <span className="text-steam-parchment font-bold text-xs">({card.sin})</span>
+                                        </>
+                                    ) : (
+                                        <span className="opacity-50 tracking-widest uppercase font-bold text-[10px]">Reveal Secret</span>
+                                    )}
+                                </div>
+                            )}
+                            {/* Visual Hint for owner */}
+                            {!card.revealed && isMine && (
+                                <div className="absolute top-0 right-0 w-2 h-2 bg-steam-verdigris rounded-bl-full"></div>
+                            )}
+                        </div>
+                    )
+                })}
              </div>
         )}
 
