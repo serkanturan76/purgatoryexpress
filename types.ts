@@ -52,6 +52,7 @@ export interface GameState {
   currentRound: number; // 1-7
   players: Player[];
   activeSins: Record<SinType, boolean>;
+  hintedSins: SinType[]; // Tracks sins used for hints across the whole game
   currentWagon: WagonCard | null;
   usedWagonIds: number[]; // Tracks IDs of wagons used in this session to prevent duplicates
   memoryCards: MemoryCard[];

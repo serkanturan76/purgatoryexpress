@@ -230,7 +230,19 @@ export default function GameRoom({ gameState, user }: Props) {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             {Object.entries(gameState.activeSins).map(([key, active]) => {
                 const sin = key as SinType;
-                const isDisabled = !active;
+                
+                // Logic update: 
+                // During INPUT, isDisabled follows current round's activeSins (resets every round)
+                // During hintMode, isDisabled follows hintedSins (permanent log)
+                let isDisabled = false;
+                if (gameState.phase === GamePhase.INPUT) {
+                  isDisabled = !active;
+                } else if (hintMode) {
+                  isDisabled = gameState.hintedSins.includes(sin);
+                } else {
+                  // Not selecting or hinting? Just visually show what's disabled for input
+                  isDisabled = !active;
+                }
                 
                 return (
                     <button 
@@ -241,7 +253,7 @@ export default function GameRoom({ gameState, user }: Props) {
                             relative h-24 md:h-24 lg:h-20 flex items-center justify-center border-2 transition-all duration-300 group overflow-hidden shadow-md
                             ${isDisabled ? 'opacity-20 grayscale border-stone-800 bg-black cursor-not-allowed' : 'border-red-900 bg-black/80 hover:bg-black hover:border-red-600'}
                             ${selectedSin === sin ? 'border-steam-verdigris bg-steam-verdigris/20 shadow-[0_0_15px_rgba(99,209,204,0.5)] scale-105 z-20' : ''}
-                            ${hintMode && active ? 'animate-pulse border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.7)] cursor-pointer' : ''}
+                            ${hintMode && !isDisabled ? 'animate-pulse border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.7)] cursor-pointer scale-105' : ''}
                         `}
                         title={SIN_DESCRIPTIONS[sin]}
                     >
@@ -308,7 +320,7 @@ export default function GameRoom({ gameState, user }: Props) {
 
       </div>
 
-      {/* Right Column: Player Input */}
+      {/* Right Column: Player Input & Hint Log */}
       <div className="lg:col-span-1 bg-steam-charcoal border-l-2 border-steam-brassDark p-6 flex flex-col justify-between shadow-2xl z-20">
         
         {gameState.phase === GamePhase.INPUT && (
@@ -348,26 +360,46 @@ export default function GameRoom({ gameState, user }: Props) {
         )}
 
         {gameState.phase === GamePhase.ROLEPLAY && (
-            <div className="space-y-6 text-center animate-fade-in">
-                <p className="text-base italic text-steam-parchment font-medium leading-relaxed bg-black/30 p-4 border border-steam-brassDark/30">
+            <div className="space-y-6 animate-fade-in flex flex-col h-full">
+                <p className="text-base italic text-steam-parchment font-medium leading-relaxed bg-black/30 p-4 border border-steam-brassDark/30 text-center">
                     "Weave your secret words into the conversation. Listen to others. Survival depends on insight."
                 </p>
                 
-                {!me?.burdened && !hintMode && (
-                    <button 
-                        onClick={() => setHintMode(true)}
-                        className="w-full py-8 bg-gradient-to-b from-red-800 to-black border-4 border-double border-red-500 text-red-50 font-rye text-xl shadow-[0_0_25px_rgba(255,0,0,0.5)] hover:scale-105 transition-transform active:scale-95 leading-tight group"
-                    >
-                        <span className="block text-red-400 text-xs mb-1 group-hover:text-red-300">EMERGENCY PROTOCOL</span>
-                        PULL BRAKE<br/>(TAKE DEBT)
-                    </button>
-                )}
-                {hintMode && (
-                    <div className="bg-red-950 border-2 border-red-500 p-5 shadow-[0_0_30px_rgba(255,0,0,0.6)] animate-pulse">
-                        <p className="text-sm font-bold text-red-100 mb-4 uppercase tracking-tighter">Select an active SIN icon on the dashboard to disable it. You will carry the burden next round.</p>
-                        <button onClick={() => setHintMode(false)} className="px-6 py-2 bg-black text-white border border-white/40 font-bold uppercase text-xs hover:bg-white hover:text-black transition-colors">Cancel</button>
-                    </div>
-                )}
+                <div className="space-y-4 flex flex-col">
+                  {!me?.burdened && !hintMode && (
+                      <button 
+                          onClick={() => setHintMode(true)}
+                          className="w-full py-8 bg-gradient-to-b from-red-800 to-black border-4 border-double border-red-500 text-red-50 font-rye text-xl shadow-[0_0_25px_rgba(255,0,0,0.5)] hover:scale-105 transition-transform active:scale-95 leading-tight group"
+                      >
+                          <span className="block text-red-400 text-xs mb-1 group-hover:text-red-300">EMERGENCY PROTOCOL</span>
+                          PULL BRAKE<br/>(TAKE DEBT)
+                      </button>
+                  )}
+                  {hintMode && (
+                      <div className="bg-red-950 border-2 border-red-500 p-5 shadow-[0_0_30px_rgba(255,0,0,0.6)] animate-pulse">
+                          <p className="text-sm font-bold text-red-100 mb-4 uppercase tracking-tighter text-center italic">Select a SIN from the tracker below to sacrifice it. This sin can never be used as a hint again.</p>
+                          <button onClick={() => setHintMode(false)} className="w-full py-2 bg-black text-white border border-white/40 font-bold uppercase text-xs hover:bg-white hover:text-black transition-colors">Cancel</button>
+                      </div>
+                  )}
+
+                  {/* Sacrificed Sins Log */}
+                  <div className="mt-4 bg-black/50 border border-steam-brassDark/40 p-4 shadow-inner">
+                      <h4 className="text-[10px] text-steam-brass font-cinzel border-b border-steam-brassDark/30 mb-3 pb-1 tracking-[0.2em] font-bold uppercase text-center">
+                          Sacrificed Sins (Used Hints)
+                      </h4>
+                      {gameState.hintedSins.length === 0 ? (
+                        <p className="text-[10px] text-steam-parchmentDim italic text-center opacity-60">No sins sacrificed yet.</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2 justify-center">
+                            {gameState.hintedSins.map(sin => (
+                              <span key={sin} className={`px-2 py-1 text-[9px] border border-red-900/50 bg-red-950/20 font-bold tracking-widest ${SIN_STYLES[sin]}`}>
+                                {SIN_ICONS[sin]}
+                              </span>
+                            ))}
+                        </div>
+                      )}
+                  </div>
+                </div>
             </div>
         )}
 

@@ -75,7 +75,7 @@ export const Backend = {
     return user;
   },
 
-  // --- Diğer Fonksiyonlar (Aynı Kalıyor ama checkInit eklendi) ---
+  // --- Diğer Fonksiyonlar ---
   getLogs: async () => {
     if (!supabase) return [];
     try {
@@ -105,6 +105,7 @@ export const Backend = {
         [SinType.PRIDE]: true, [SinType.GREED]: true, [SinType.LUST]: true,
         [SinType.ENVY]: true, [SinType.GLUTTONY]: true, [SinType.WRATH]: true, [SinType.SLOTH]: true
       },
+      hintedSins: [],
       currentWagon: null,
       usedWagonIds: [],
       memoryCards: [],
@@ -182,6 +183,13 @@ export const Backend = {
     state.phase = GamePhase.INPUT;
     state.timerSeconds = 300;
     state.timerActive = false;
+    
+    // Reset active sins for input phase at the start of every round
+    state.activeSins = {
+      [SinType.PRIDE]: true, [SinType.GREED]: true, [SinType.LUST]: true,
+      [SinType.ENVY]: true, [SinType.GLUTTONY]: true, [SinType.WRATH]: true, [SinType.SLOTH]: true
+    };
+
     Backend.updateRemoteState(state);
   },
 
@@ -222,7 +230,15 @@ export const Backend = {
   takeDebt: (playerNickname: string, sinToDisable: SinType) => {
     if (!activeGame) return;
     const state = { ...activeGame };
+    
+    // Disable for current round input (if any)
     state.activeSins[sinToDisable] = false;
+    
+    // Add to permanent hint list
+    if (!state.hintedSins.includes(sinToDisable)) {
+      state.hintedSins.push(sinToDisable);
+    }
+
     const p = state.players.find(pl => pl.nickname === playerNickname);
     if (p) p.burdened = true;
     Backend.updateRemoteState(state);
