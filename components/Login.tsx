@@ -48,8 +48,56 @@ export default function Login({ onLogin }: Props) {
         </div>
       </div>
 
+      {/* Narrative Intro Text */}
+      <div className="max-w-3xl text-center px-6">
+        <p className="font-playfair italic text-steam-parchmentDim text-lg md:text-xl leading-relaxed tracking-wide opacity-90">
+          You have awakened on a train that appears on no map, bound for a destination you 
+          are too terrified to name. Outside the windows, a void swallows the light, while inside, 
+          the air smells of old regrets and burning coal. To leave this purgatory, you must 
+          confront the seven deadly sins that stain your soul. Only by confessing your darkest 
+          secrets and uncovering the burdens of your fellow passengers can you hope to find 
+          redemption.
+        </p>
+      </div>
+
+      {/* Divider Icon */}
+      <div className="text-steam-rust text-2xl transform rotate-45">
+        <div className="grid grid-cols-2 gap-1 scale-75">
+          <div className="w-2 h-2 bg-steam-rust"></div>
+          <div className="w-2 h-2 bg-steam-rust"></div>
+          <div className="w-2 h-2 bg-steam-rust"></div>
+          <div className="w-2 h-2 bg-steam-rust"></div>
+        </div>
+      </div>
+
+      {/* Manifest Protocols Box */}
+      <div className="w-full max-w-4xl border border-steam-brassDark/40 p-1 bg-black/20">
+        <div className="border border-steam-brassDark/60 p-8 md:p-12 text-center space-y-8 bg-steam-dark/40 backdrop-blur-sm">
+            <div className="space-y-2">
+                <h2 className="font-cinzel text-steam-brass tracking-[0.3em] text-sm md:text-base border-b border-steam-rust/40 pb-2 inline-block">
+                    MANIFEST PROTOCOLS
+                </h2>
+                <div className="text-steam-rust font-cinzel text-xs md:text-sm tracking-widest font-bold pt-4">
+                    3-5 PLAYERS • 45-60 MIN • NARRATIVE HORROR
+                </div>
+            </div>
+
+            <div className="space-y-6 text-steam-parchmentDim font-cinzel text-[10px] md:text-xs leading-loose tracking-widest max-w-2xl mx-auto uppercase">
+                <p>THIS IS A COLLABORATIVE STORYTELLING EXPERIENCE OF HIDDEN TRUTHS AND SOCIAL DEDUCTION.</p>
+                
+                <p>
+                    ONE PLAYER ASSUMES THE ROLE OF THE <strong className="text-steam-parchment font-bold">CONDUCTOR</strong>, 
+                    GUIDING THE JOURNEY THROUGH SURREAL WAGONS. <strong className="text-steam-parchment font-bold">PASSENGERS</strong> DRAW 
+                    WAGON CARDS AND MUST ANONYMOUSLY SUBMIT "MEMORIES"—SHORT, HAUNTING CONFESSIONS LINKED TO THE DEADLY SINS. 
+                    THE GROUP MUST DISCUSS THESE REVELATIONS TO DEDUCE WHO CARRIES WHICH BURDEN. POINTS ARE AWARDED 
+                    FOR INSIGHT AND HONESTY, BUT THE TRUE VICTORY IS SURVIVING THE JOURNEY WITH YOUR SOUL INTACT.
+                </p>
+            </div>
+        </div>
+      </div>
+
       {/* Ticket Counter / Login Form */}
-      <div className="w-full max-w-md relative mt-12">
+      <div className="w-full max-w-md relative">
         <div className="bg-steam-charcoal/90 border-t-4 border-steam-rust p-8 shadow-2xl backdrop-blur-md relative overflow-hidden">
             
             {/* Form Toggle Tabs */}
