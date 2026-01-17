@@ -3,16 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Purgatory Express</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Rye&display=swap" rel="stylesheet">
+    <title>The Purgatory Express</title>
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0228391169566132"
+     crossorigin="anonymous"></script>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Rye&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
+              primary: "#c2410c", // Burnt Orange / Rust
+              "background-light": "#f2eee3", // Aged Paper
+              "background-dark": "#0c0a09", // Stone 950
+              "parchment": "#eaddca",
+              "accent-red": "#7f1d1d",
+              "text-light": "#3d3028",
+              "text-dark": "#d6d3d1",
               steam: {
                 dark: '#0f0f11',
                 charcoal: '#262626',
@@ -27,56 +40,95 @@
               }
             },
             fontFamily: {
+              display: ["'Rye'", "serif"],
+              serif: ["'Crimson Text'", "serif"],
+              heading: ["'Playfair Display'", "serif"],
               cinzel: ['Cinzel', 'serif'],
-              playfair: ['Playfair Display', 'serif'],
               rye: ['Rye', 'cursive'],
+            },
+            backgroundImage: {
+              'train-pattern': "url('https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=2684&auto=format&fit=crop')",
             },
             animation: {
               'fog-drift': 'drift 20s linear infinite alternate',
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'shine': 'shine 1.5s ease-out infinite',
             },
             keyframes: {
               drift: {
                 '0%': { transform: 'translateX(-5%) opacity(0.8)' },
                 '100%': { transform: 'translateX(5%) opacity(0.4)' },
+              },
+              shine: {
+                '100%': { left: '125%' },
               }
             }
           }
         }
       }
     </script>
-    <style>
-      body {
-        background-color: #0f0f11;
-        color: #f2e8cf;
+    <style type="text/tailwindcss">
+      ::-webkit-scrollbar { width: 8px }
+      ::-webkit-scrollbar-track { background: #1c1917 }
+      ::-webkit-scrollbar-thumb { background: #57534e; border-radius: 4px }
+      
+      .text-glow { text-shadow: 0 0 10px rgba(194, 65, 12, 0.3) }
+      
+      .noise-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none; z-index: 50; opacity: 0.12;
+        background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCpNe6FdDajBliY0cdk7S_MsEmiXJoL71Reqt_l2NkpFlDog29aLhTd8kIZqnuU6fASwBxIqQorliyvJkR9hM11GxzzIeJVp9CLvolAJBe9Bb7HjySFL9WN3UiODV8-NP3Ts9zsDdwFt_Rqh8MlzpbdK-LeiD3Knwt-L8Ev17an_JVMDjB5AcNdBFsRbQjuc_moRpKKXVti9ee-6ghp998isL0cuR41hl3yB7Evdx6xbJg9Y4pYlbJjlK9vxghTfV0pLKuS2VYYhwVf);
+        mix-blend-mode: multiply;
       }
-      .scrollbar-steam::-webkit-scrollbar {
-        width: 8px;
+
+      .paper-texture {
+        background-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.4) 0%, rgba(12, 10, 9, 0.8) 90%), url(https://lh3.googleusercontent.com/aida-public/AB6AXuD7lZA5nP0erdL2gxx838Lt5aHLKI5-lPtdwrxjDbEm9u1f4zBxWmUATaORGYEuV9XJJe2o0Q8L5rV6sI2MzQsmp1yJybx81nXAN8cKlOP6dGJSdRcsnBnL5DLWy2-ZC2Gdr6Fe2gMEYwQ5Cdp0v8tZAKiHkx-YlcnvXfBXO9XNx_pIcH5eP0o7EDbyDEZwaB8Hfg6ZVwVg_4jHUqj1P7uvv4fTLqGi3gIPWfyDal9eu-yCNeNnY1LG9ji4ZosUg596sByVUCvDp_rY);
+        background-size: cover; background-attachment: fixed; background-blend-mode: multiply;
       }
-      .scrollbar-steam::-webkit-scrollbar-track {
-        background: #1a1a1a; 
+
+      .ticket-stub {
+        position: relative;
+        background: #e2d1b5;
+        mask-image: radial-gradient(circle at 0 50%, transparent 8px, black 8.5px), radial-gradient(circle at 100% 50%, transparent 8px, black 8.5px);
+        mask-size: 100% 100%;
       }
-      .scrollbar-steam::-webkit-scrollbar-thumb {
-        background: #a64d2a; 
-        border-radius: 4px;
+
+      .tear-edges {
+        clip-path: polygon(0% 0%, 2% 1%, 4% 0%, 6% 2%, 8% 0%, 10% 1%, 12% 0%, 14% 2%, 16% 0%, 18% 1%, 20% 0%, 22% 2%, 24% 0%, 26% 1%, 28% 0%, 30% 2%, 32% 0%, 34% 1%, 36% 0%, 38% 2%, 40% 0%, 42% 1%, 44% 0%, 46% 2%, 48% 0%, 50% 1%, 52% 0%, 54% 2%, 56% 0%, 58% 1%, 60% 0%, 62% 2%, 64% 0%, 66% 1%, 68% 0%, 70% 2%, 72% 0%, 74% 1%, 76% 0%, 78% 2%, 80% 0%, 82% 1%, 84% 0%, 86% 2%, 88% 0%, 90% 1%, 92% 0%, 94% 2%, 96% 0%, 98% 1%, 100% 0%, 100% 100%, 98% 99%, 96% 100%, 94% 98%, 92% 100%, 90% 99%, 88% 100%, 86% 98%, 84% 100%, 82% 99%, 80% 100%, 78% 98%, 76% 100%, 74% 99%, 72% 100%, 70% 98%, 68% 100%, 66% 99%, 64% 100%, 62% 98%, 60% 100%, 58% 99%, 56% 100%, 54% 98%, 52% 100%, 50% 99%, 48% 100%, 46% 98%, 44% 100%, 42% 99%, 40% 100%, 38% 98%, 36% 100%, 34% 99%, 32% 100%, 30% 98%, 28% 100%, 26% 99%, 24% 100%, 22% 98%, 20% 100%, 18% 99%, 16% 100%, 14% 98%, 12% 100%, 10% 99%, 8% 100%, 6% 98%, 4% 100%, 2% 99%, 0% 100%);
       }
+
+      .stain { background: radial-gradient(circle at center, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05), transparent 70%); filter: blur(50px); mix-blend-mode: color-dodge; }
+      .mineral-deposit { background: radial-gradient(circle at center, rgba(254, 240, 138, 0.1), transparent 60%); filter: blur(20px); mix-blend-mode: hard-light; }
+      
+      .scrollbar-steam::-webkit-scrollbar { width: 8px; }
+      .scrollbar-steam::-webkit-scrollbar-track { background: #1a1a1a; }
+      .scrollbar-steam::-webkit-scrollbar-thumb { background: #a64d2a; border-radius: 4px; }
+      
       .glass-gauge {
         background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), rgba(0,0,0,0.5));
-        box-shadow: inset 0 0 10px #000;
-        border: 2px solid #666;
+        box-shadow: inset 0 0 10px #000; border: 2px solid #666;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/"
-  }
-}
-</script>
-</head>
-  <body>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/"
+      }
+    }
+    </script>
+  </head>
+  <body class="bg-black text-text-light dark:text-text-dark font-serif min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-white transition-colors duration-300 paper-texture">
+    <div class="fixed inset-0 z-0 bg-black">
+      <div class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-train-pattern opacity-80 mix-blend-normal transform scale-110"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent mix-blend-multiply"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/90 via-transparent to-black/90 z-10"></div>
+      <div class="absolute top-[40%] left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 blur-[100px] rounded-full mix-blend-screen animate-pulse"></div>
+      <div class="absolute top-1/4 -left-20 w-72 h-72 stain opacity-30 animate-pulse" style="animation-duration: 4s;"></div>
+      <div class="absolute bottom-1/3 -right-20 w-96 h-96 stain opacity-20 animate-pulse" style="animation-duration: 7s;"></div>
+    </div>
+    <div class="noise-overlay"></div>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
