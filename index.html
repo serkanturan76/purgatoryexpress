@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Purgatory Express</title>
+    <meta name="description" content="The Purgatory Express - A cooperative social deduction and narrative horror game. Confront your sins, uncover secrets, and survive the journey." />
+    <title>The Purgatory Express | Narrative Social Deduction Game</title>
     
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0228391169566132"
@@ -45,6 +46,7 @@
               heading: ["'Playfair Display'", "serif"],
               cinzel: ['Cinzel', 'serif'],
               rye: ['Rye', 'cursive'],
+              playfair: ["'Playfair Display'", "serif"],
             },
             backgroundImage: {
               'train-pattern': "url('https://images.unsplash.com/photo-1474487548417-781cb71495f3?q=80&w=2684&auto=format&fit=crop')",
@@ -53,14 +55,19 @@
               'fog-drift': 'drift 20s linear infinite alternate',
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               'shine': 'shine 1.5s ease-out infinite',
+              'fade-in': 'fadeIn 1s ease-out forwards',
             },
             keyframes: {
               drift: {
-                '0%': { transform: 'translateX(-5%) opacity(0.8)' },
-                '100%': { transform: 'translateX(5%) opacity(0.4)' },
+                '0%': { transform: 'translateX(-5%)' },
+                '100%': { transform: 'translateX(5%)' },
               },
               shine: {
                 '100%': { left: '125%' },
+              },
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
               }
             }
           }
